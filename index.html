@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chasing the Clicks</title>
+        <style>
+            /* Center the button */
+            button {
+                display: block;
+                margin: 0 auto;
+                font-size: 2rem;
+                padding: 1rem 2rem;
+                background-color: #0096c7;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+
+            /* Center the click count */
+            #count {
+                text-align: center;
+                font-size: 3rem;
+                margin-top: 2rem;
+            }
+        </style>
+    </head>
+    <body>
+        <button id="click-button">Click me!</button>
+        <div id="count">0</div>
+        <script>
+            // Get the button and count elements
+            const button = document.getElementById("click-button")
+            const count = document.getElementById("count")
+
+            // Initialize the count to the previous value or 0
+            let clickCount = localStorage.getItem("clickCount") || 0
+            count.textContent = clickCount
+
+            // Add a click event listener to the button
+            button.addEventListener("click", () => {
+                // Increment the count
+                clickCount++
+                count.textContent = clickCount
+
+                // Store the count in localStorage
+                localStorage.setItem("clickCount", clickCount)
+            })
+        </script>
+    </body>
+</html>
