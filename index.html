@@ -132,20 +132,6 @@
                 row.appendChild(countCell)
                 tbody.appendChild(row)
             }
-
-            // Add a click event listener to the delete cells
-            table.addEventListener("click", event => {
-                if (event.target.classList.contains("delete-cell")) {
-                    const row = event.target.closest("tr")
-                    const country = row.dataset.country
-                    delete countryData[country]
-                    localStorage.setItem(
-                        "countryData",
-                        JSON.stringify(countryData)
-                    )
-                    row.remove()
-                }
-            })
         </script>
     </body>
 </html>
