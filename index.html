@@ -1,3 +1,5 @@
+<!-- @format -->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -55,73 +57,17 @@
             <tbody id="country-data"></tbody>
         </table>
         <script>
-            // Get the button, count, and table elements
+            // Get the button and count elements
             const button = document.getElementById("click-button")
             const count = document.getElementById("count")
-            const table = document.getElementById("country-data")
 
-            // Initialize the count and country data from local storage
+            // Initialize the count to the previous value or 0
             let clickCount = localStorage.getItem("clickCount") || 0
             count.textContent = clickCount
+
+            // Initialize the country data to the previous value or empty object
             let countryData =
                 JSON.parse(localStorage.getItem("countryData")) || {}
-
-            // Add a click event listener to the button
-            button.addEventListener("click", async () => {
-                // Increment the count
-                clickCount++
-                count.textContent = clickCount
-
-                // Store the count in local storage
-                localStorage.setItem("clickCount", clickCount)
-
-                // Get the user's country using an API
-                try {
-                    const response = await fetch("https://ipapi.co/json/")
-                    const data = await response.json()
-                    const country = data.country_name
-
-                    // Update the country data and store it in local storage
-                    if (countryData[country]) {
-                        countryData[country]++
-                    } else {
-                        countryData[country] = 1
-                    }
-                    localStorage.setItem(
-                        "countryData",
-                        JSON.stringify(countryData)
-                    )
-
-                    // Update the table with the latest country data
-                    updateTable(countryData)
-                } catch (error) {
-                    console.error(error)
-                }
-            })
-
-            // Function to update the table with the latest country data
-            function updateTable(data) {
-                // Clear the table first
-                table.innerHTML = ""
-
-                // Generate the table rows
-                for (const [country, clicks] of Object.entries(data)) {
-                    const row = document.createElement("tr")
-                    const countryCell = document.createElement("td")
-                    countryCell.textContent = country
-                    const clicksCell = document.createElement("td")
-                    clicksCell.textContent = clicks
-
-                    row.appendChild(countryCell)
-                    row.appendChild(clicksCell)
-
-                    table.appendChild(row)
-                }
-            }
-
-            // Display the initial country data in the table
-            clickCount = localStorage.getItem("clickCount") || 0
-            count.textContent = clickCount
 
             // Add a click event listener to the button
             button.addEventListener("click", () => {
@@ -132,18 +78,59 @@
                 // Store the count in localStorage
                 localStorage.setItem("clickCount", clickCount)
 
-                // Get the user's country using the getUserCountry function
-                getUserCountry().then(country => {
-                    // Get the table body element and add a new row with the country and click count
-                    const tableBody = document.getElementById("table-body")
-                    const newRow = tableBody.insertRow(-1)
-                    const countryCell = newRow.insertCell(0)
-                    const countCell = newRow.insertCell(1)
-                    countryCell.textContent = country
-                    countCell.textContent = clickCount
-                })
+                // Get the user's country using the IP API
+                if (navigator.geolocation) {
+                    navigator.permissions
+                        .query({ name: "geolocation" })
+                        .then(result => {
+                            if (result.state === "granted") {
+                                navigator.geolocation.getCurrentPosition(
+                                    position => {
+                                        const url = `https://ipapi.co/json/${position.coords.latitude},${position.coords.longitude}/`
+                                        fetch(url)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                const country =
+                                                    data.country_name
+                                                countryData[country] =
+                                                    (countryData[country] ||
+                                                        0) + 1
+                                                localStorage.setItem(
+                                                    "countryData",
+                                                    JSON.stringify(countryData)
+                                                )
+                                            })
+                                            .catch(error =>
+                                                console.error(error)
+                                            )
+                                    }
+                                )
+                            } else {
+                                console.error(
+                                    "Geolocation permission not granted."
+                                )
+                            }
+                        })
+                } else {
+                    console.error(
+                        "Geolocation is not supported by this browser."
+                    )
+                }
             })
-            updateTable(countryData)
+
+            // Display the click count and country data on page load
+            count.textContent = clickCount
+            for (const country in countryData) {
+                const count = countryData[country]
+                const row = document.createElement("tr")
+                const countryCell = document.createElement("td")
+                const countCell = document.createElement("td")
+                countryCell.textContent = country
+                countCell.textContent = count
+                row.appendChild(countryCell)
+                row.appendChild(countCell)
+                document.getElementById("country-table").appendChild(row)
+            }
         </script>
     </body>
 </html>
