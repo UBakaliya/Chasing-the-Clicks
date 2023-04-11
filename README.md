@@ -12,7 +12,9 @@
 
 ## How to use it
 
-To use the application, simply open the index.html file in a web browser. Click the "Click me!" button to increment the counter, and the table will update to show the distribution of clicks by geography.
+To use the application, simply open the ```https://ubakaliya.github.io/Chasing-the-Clicks/``` file in a web browser. Click the "Click me!" button to increment the counter, and the table will update to show the distribution of clicks by geography.
+
+
 
 ## License
 
