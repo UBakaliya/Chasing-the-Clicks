@@ -1,3 +1,5 @@
+<!-- @format -->
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -22,17 +24,103 @@
                 font-size: 3rem;
                 margin-top: 2rem;
             }
+
+            /* Center the country table */
+            #country-table {
+                margin: 2rem auto;
+                font-size: 1.5rem;
+            }
+
+            #country-table th,
+            #country-table td {
+                padding: 0.5rem 1rem;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            #country-table th {
+                background-color: #0096c7;
+                color: white;
+            }
         </style>
     </head>
     <body>
         <button id="click-button">Click me!</button>
         <div id="count">0</div>
+        <table id="country-table">
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Clicks</th>
+                </tr>
+            </thead>
+            <tbody id="country-data"></tbody>
+        </table>
         <script>
-            // Get the button and count elements
+            // Get the button, count, and table elements
             const button = document.getElementById("click-button")
             const count = document.getElementById("count")
+            const table = document.getElementById("country-data")
 
-            // Initialize the count to the previous value or 0
+            // Initialize the count and country data from local storage
+            let clickCounter = localStorage.getItem("clickCount") || 0
+            count.textContent = clickCounter
+            let countryData =
+                JSON.parse(localStorage.getItem("countryData")) || {}
+            // Add a click event listener to the button
+            button.addEventListener("click", async () => {
+                // Increment the count
+                clickCounter++
+                count.textContent = clickCounter
+
+                // Store the count in local storage
+                localStorage.setItem("clickCount", clickCounter)
+
+                // Get the user's country using an API
+                try {
+                    const response = await fetch("https://ipapi.co/json/")
+                    const data = await response.json()
+                    const country = data.country_name
+
+                    // Update the country data and store it in local storage
+                    if (countryData[country]) {
+                        countryData[country]++
+                    } else {
+                        countryData[country] = 1
+                    }
+                    localStorage.setItem(
+                        "countryData",
+                        JSON.stringify(countryData)
+                    )
+
+                    // Update the table with the latest country data
+                    updateTable(countryData)
+                } catch (error) {
+                    console.error(error)
+                }
+            })
+
+            // Function to update the table with the latest country data
+            function updateTable(data) {
+                // Clear the table first
+                table.innerHTML = ""
+
+                // Generate the table rows
+                for (const [country, clicks] of Object.entries(data)) {
+                    const row = document.createElement("tr")
+                    const countryCell = document.createElement("td")
+                    countryCell.textContent = country
+                    const clicksCell = document.createElement("td")
+                    clicksCell.textContent = clicks
+
+                    row.appendChild(countryCell)
+                    row.appendChild(clicksCell)
+
+                    table.appendChild(row)
+                }
+            }
+
+            // Display the initial country data in the table
             let clickCount = localStorage.getItem("clickCount") || 0
             count.textContent = clickCount
 
@@ -44,6 +132,17 @@
 
                 // Store the count in localStorage
                 localStorage.setItem("clickCount", clickCount)
+
+                // Get the user's country using the getUserCountry function
+                getUserCountry().then(country => {
+                    // Get the table body element and add a new row with the country and click count
+                    const tableBody = document.getElementById("table-body")
+                    const newRow = tableBody.insertRow(-1)
+                    const countryCell = newRow.insertCell(0)
+                    const countCell = newRow.insertCell(1)
+                    countryCell.textContent = country
+                    countCell.textContent = clickCount
+                })
             })
         </script>
     </body>
