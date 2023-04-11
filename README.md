@@ -1,6 +1,7 @@
 <!-- @format -->
 
-# Chasing the Clicks (https://ubakaliya.github.io/Chasing-the-Clicks/)
+# Chasing the Clicks 
+## https://ubakaliya.github.io/Chasing-the-Clicks/
 
 -   Chasing the Clicks is a simple web application that allows users to click a button to increment a counter. The counter is stored in the user's browser using localStorage, so the counter persists even when the user refreshes the page. In addition to the counter, the application also displays a table that shows the distribution of clicks by geography.
 
