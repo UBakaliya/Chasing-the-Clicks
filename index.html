@@ -1,5 +1,3 @@
-<!-- @format -->
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -63,18 +61,19 @@
             const table = document.getElementById("country-data")
 
             // Initialize the count and country data from local storage
-            let clickCounter = localStorage.getItem("clickCount") || 0
-            count.textContent = clickCounter
+            let clickCount = localStorage.getItem("clickCount") || 0
+            count.textContent = clickCount
             let countryData =
                 JSON.parse(localStorage.getItem("countryData")) || {}
+
             // Add a click event listener to the button
             button.addEventListener("click", async () => {
                 // Increment the count
-                clickCounter++
-                count.textContent = clickCounter
+                clickCount++
+                count.textContent = clickCount
 
                 // Store the count in local storage
-                localStorage.setItem("clickCount", clickCounter)
+                localStorage.setItem("clickCount", clickCount)
 
                 // Get the user's country using an API
                 try {
@@ -121,7 +120,7 @@
             }
 
             // Display the initial country data in the table
-            let clickCount = localStorage.getItem("clickCount") || 0
+            clickCount = localStorage.getItem("clickCount") || 0
             count.textContent = clickCount
 
             // Add a click event listener to the button
@@ -144,6 +143,7 @@
                     countCell.textContent = clickCount
                 })
             })
+            updateTable(countryData)
         </script>
     </body>
 </html>
