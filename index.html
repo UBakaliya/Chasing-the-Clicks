@@ -78,12 +78,13 @@
                 // Store the count in localStorage
                 localStorage.setItem("clickCount", clickCount)
 
-                // Get the user's country using the IP API
-                if (navigator.geolocation) {
+                // Ask for permission before getting the user's location
+                if (navigator.permissions) {
                     navigator.permissions
                         .query({ name: "geolocation" })
                         .then(result => {
                             if (result.state === "granted") {
+                                // Get the user's country using the IP API
                                 navigator.geolocation.getCurrentPosition(
                                     position => {
                                         const url = `https://ipapi.co/json/${position.coords.latitude},${position.coords.longitude}/`
@@ -99,16 +100,38 @@
                                                     "countryData",
                                                     JSON.stringify(countryData)
                                                 )
+                                                updateCountryTable(countryData)
                                             })
                                             .catch(error =>
                                                 console.error(error)
                                             )
                                     }
                                 )
-                            } else {
-                                console.error(
-                                    "Geolocation permission not granted."
+                            } else if (result.state === "prompt") {
+                                navigator.geolocation.getCurrentPosition(
+                                    position => {
+                                        const url = `https://ipapi.co/json/${position.coords.latitude},${position.coords.longitude}/`
+                                        fetch(url)
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                const country =
+                                                    data.country_name
+                                                countryData[country] =
+                                                    (countryData[country] ||
+                                                        0) + 1
+                                                localStorage.setItem(
+                                                    "countryData",
+                                                    JSON.stringify(countryData)
+                                                )
+                                                updateCountryTable(countryData)
+                                            })
+                                            .catch(error =>
+                                                console.error(error)
+                                            )
+                                    }
                                 )
+                            } else if (result.state === "denied") {
+                                console.error("Geolocation permission denied.")
                             }
                         })
                 } else {
@@ -120,16 +143,22 @@
 
             // Display the click count and country data on page load
             count.textContent = clickCount
-            for (const country in countryData) {
-                const count = countryData[country]
-                const row = document.createElement("tr")
-                const countryCell = document.createElement("td")
-                const countCell = document.createElement("td")
-                countryCell.textContent = country
-                countCell.textContent = count
-                row.appendChild(countryCell)
-                row.appendChild(countCell)
-                document.getElementById("country-table").appendChild(row)
+            updateCountryTable(countryData)
+
+            function updateCountryTable(countryData) {
+                const tableBody = document.getElementById("country-data")
+                tableBody.innerHTML = ""
+                for (const country in countryData) {
+                    const count = countryData[country]
+                    const row = document.createElement("tr")
+                    const countryCell = document.createElement("td")
+                    const countCell = document.createElement("td")
+                    countryCell.textContent = country
+                    countCell.textContent = count
+                    row.appendChild(countryCell)
+                    row.appendChild(countCell)
+                    tableBody.appendChild(row)
+                }
             }
         </script>
     </body>
