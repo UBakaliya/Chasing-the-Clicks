@@ -78,88 +78,74 @@
                 // Store the count in localStorage
                 localStorage.setItem("clickCount", clickCount)
 
-                // Ask for permission before getting the user's location
-                if (navigator.permissions) {
-                    navigator.permissions
-                        .query({ name: "geolocation" })
-                        .then(result => {
-                            if (result.state === "granted") {
-                                // Get the user's country using the IP API
-                                navigator.geolocation.getCurrentPosition(
-                                    position => {
-                                        const url = `https://ipapi.co/json/${position.coords.latitude},${position.coords.longitude}/`
-                                        fetch(url)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const country =
-                                                    data.country_name
-                                                countryData[country] =
-                                                    (countryData[country] ||
-                                                        0) + 1
-                                                localStorage.setItem(
-                                                    "countryData",
-                                                    JSON.stringify(countryData)
-                                                )
-                                                updateCountryTable(countryData)
-                                            })
-                                            .catch(error =>
-                                                console.error(error)
-                                            )
-                                    }
-                                )
-                            } else if (result.state === "prompt") {
-                                navigator.geolocation.getCurrentPosition(
-                                    position => {
-                                        const url = `https://ipapi.co/json/${position.coords.latitude},${position.coords.longitude}/`
-                                        fetch(url)
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                const country =
-                                                    data.country_name
-                                                countryData[country] =
-                                                    (countryData[country] ||
-                                                        0) + 1
-                                                localStorage.setItem(
-                                                    "countryData",
-                                                    JSON.stringify(countryData)
-                                                )
-                                                updateCountryTable(countryData)
-                                            })
-                                            .catch(error =>
-                                                console.error(error)
-                                            )
-                                    }
-                                )
-                            } else if (result.state === "denied") {
-                                console.error("Geolocation permission denied.")
-                            }
-                        })
-                } else {
-                    console.error(
-                        "Geolocation is not supported by this browser."
-                    )
-                }
+                // Get the user's country using the IP API
+                fetch("https://ipapi.co/json/")
+                    .then(response => response.json())
+                    .then(data => {
+                        const country = data.country_name || "Unknown"
+                        countryData[country] = (countryData[country] || 0) + 1
+                        localStorage.setItem(
+                            "countryData",
+                            JSON.stringify(countryData)
+                        )
+
+                        // Update the country table
+                        const table = document.getElementById("country-table")
+                        const tbody = table.querySelector("tbody")
+                        const existingRow = tbody.querySelector(
+                            `[data-country="${country}"]`
+                        )
+                        if (existingRow) {
+                            existingRow.querySelector(
+                                ".click-count"
+                            ).textContent = countryData[country]
+                        } else {
+                            const row = document.createElement("tr")
+                            row.dataset.country = country
+                            const countryCell = document.createElement("td")
+                            const countCell = document.createElement("td")
+                            countryCell.textContent = country
+                            countCell.textContent = countryData[country]
+                            countCell.classList.add("click-count")
+                            row.appendChild(countryCell)
+                            row.appendChild(countCell)
+                            tbody.appendChild(row)
+                        }
+                    })
+                    .catch(error => console.error(error))
             })
 
             // Display the click count and country data on page load
             count.textContent = clickCount
-            updateCountryTable(countryData)
-
-            function updateCountryTable(countryData) {
-                const tableBody = document.getElementById("country-data")
-                tableBody.innerHTML = ""
-                for (const country in countryData) {
-                    const count = countryData[country]
-                    const row = document.createElement("tr")
-                    const countryCell = document.createElement("td")
-                    const countCell = document.createElement("td")
-                    countryCell.textContent = country
-                    countCell.textContent = count
-                    row.appendChild(countryCell)
-                    row.appendChild(countCell)
-                    tableBody.appendChild(row)
-                }
+            const table = document.getElementById("country-table")
+            const tbody = table.querySelector("tbody")
+            for (const country in countryData) {
+                const count = countryData[country]
+                const row = document.createElement("tr")
+                row.dataset.country = country
+                const countryCell = document.createElement("td")
+                const countCell = document.createElement("td")
+                countryCell.textContent = country
+                countCell.textContent = count
+                countCell.classList.add("click-count")
+                row.appendChild(countryCell)
+                row.appendChild(countCell)
+                tbody.appendChild(row)
             }
+
+            // Add a click event listener to the delete cells
+            table.addEventListener("click", event => {
+                if (event.target.classList.contains("delete-cell")) {
+                    const row = event.target.closest("tr")
+                    const country = row.dataset.country
+                    delete countryData[country]
+                    localStorage.setItem(
+                        "countryData",
+                        JSON.stringify(countryData)
+                    )
+                    row.remove()
+                }
+            })
         </script>
     </body>
 </html>
