@@ -86,7 +86,7 @@
                 fetch("https://ipapi.co/json/")
                     .then(response => response.json())
                     .then(data => {
-                        const country = data.country_name
+                        const country = data.country_name || "Unknown"
                         countryData[country] = (countryData[country] || 0) + 1
                         localStorage.setItem(
                             "countryData",
